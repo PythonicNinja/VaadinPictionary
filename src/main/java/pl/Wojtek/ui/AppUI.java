@@ -33,12 +33,13 @@ public class AppUI extends UI {
     private int currentOpId = -1;
     private Label compositionName;
     private Boolean isClicked = false;
+    private int prevX = -1;
+    private int prevY = -1;
 
     @WebServlet(value = { "/*", "/VAADIN/*" }, asyncSupported = true)
     @VaadinServletConfiguration(widgetset="pl.Wojtek.MyAppWidgetset", productionMode = false, ui = AppUI.class)
     public static class Servlet extends VaadinServlet {
     }
-
 
 
     @Override
@@ -56,17 +57,17 @@ public class AppUI extends UI {
         content.addComponent(compositionName = new Label());
         content.setComponentAlignment(compositionName, Alignment.TOP_LEFT);
 
-
-
-
         canvas.addMouseMoveListener(new Canvas.CanvasMouseMoveListener() {
             @Override
             public void onMove(MouseEventDetails mouseDetails) {
-                System.out.println("Mouse moved at "
-                        + mouseDetails.getClientX() + ","
-                        + mouseDetails.getClientY());
+                int x = mouseDetails.getClientX();
+                int y = mouseDetails.getClientY();
 
-                if(isClicked) {
+                System.out.println("Mouse moved at "
+                        + x + ","
+                        + y);
+
+                if(isClicked && prevX != -1 && prevY != -1) {
                     canvas.saveContext();
                     canvas.beginPath();
 
@@ -74,14 +75,17 @@ public class AppUI extends UI {
                     canvas.setLineCap("round");
                     canvas.setMiterLimit(1);
 
-                    canvas.moveTo(mouseDetails.getClientX(), mouseDetails.getClientY());
-                    canvas.lineTo(mouseDetails.getClientX() + 10, mouseDetails.getClientY() + 10);
+                    canvas.moveTo(prevX, prevY);
+                    canvas.lineTo(x, y);
 
                     canvas.stroke();
                     canvas.closePath();
 
                     canvas.restoreContext();
                 }
+                prevX = x;
+                prevY = y;
+
             }
         });
 
