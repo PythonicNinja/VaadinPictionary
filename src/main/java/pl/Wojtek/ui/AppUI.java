@@ -1,22 +1,19 @@
 package pl.Wojtek.ui;
 
 import javax.servlet.annotation.WebServlet;
-
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
+import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import org.vaadin.hezamu.canvas.Canvas;
+import pl.Wojtek.view.ChatView;
 
 
 @Push
@@ -24,17 +21,15 @@ import org.vaadin.hezamu.canvas.Canvas;
 @Theme("valo")
 @Widgetset("pl.Wojtek.MyAppWidgetset")
 public class AppUI extends UI {
-    private Canvas canvas;
 
-    private final String[] compositeOps = { "source-over", "source-atop",
-            "source-in", "source-out", "destination-atop", "destination-in",
-            "destination-out", "destination-over", "lighter", "darker", "xor",
-            "copy" };
-    private int currentOpId = -1;
-    private Label compositionName;
+
+    private Canvas canvas;
+    private ChatView chatView;
     private Boolean isClicked = false;
     private int prevX = -1;
     private int prevY = -1;
+    private String strokeColor = "black";
+    private double strokeSize = 5.0;
 
     @WebServlet(value = { "/*", "/VAADIN/*" }, asyncSupported = true)
     @VaadinServletConfiguration(widgetset="pl.Wojtek.MyAppWidgetset", productionMode = false, ui = AppUI.class)
@@ -47,15 +42,23 @@ public class AppUI extends UI {
         VerticalLayout content = new VerticalLayout();
         setContent(content);
 
-        content.addComponent(canvas = new Canvas());
+        final HorizontalLayout firstRow = new HorizontalLayout();
+        firstRow.setSizeFull();
+        content.addComponent(firstRow);
+
+        VerticalLayout canvasWrapper = new VerticalLayout();
+        canvasWrapper.setSizeFull();
+        canvas = new Canvas();
         canvas.setSizeFull();
-
-        drawInitialPattern();
-
+        canvas.setHeight("500px");
+        canvasWrapper.addComponent(canvas);
         final HorizontalLayout bs = new HorizontalLayout();
-        content.addComponent(bs);
-        content.addComponent(compositionName = new Label());
-        content.setComponentAlignment(compositionName, Alignment.TOP_LEFT);
+        canvasWrapper.addComponent(bs);
+
+        firstRow.addComponent(canvasWrapper);
+
+        chatView = new ChatView();
+        firstRow.addComponent(chatView);
 
         canvas.addMouseMoveListener(new Canvas.CanvasMouseMoveListener() {
             @Override
@@ -63,18 +66,18 @@ public class AppUI extends UI {
                 int x = mouseDetails.getClientX();
                 int y = mouseDetails.getClientY();
 
-                System.out.println("Mouse moved at "
-                        + x + ","
-                        + y);
+//                System.out.println("Mouse moved at "
+//                        + x + ","
+//                        + y + " - " + strokeColor);
 
                 if(isClicked && prevX != -1 && prevY != -1) {
                     canvas.saveContext();
                     canvas.beginPath();
 
-                    canvas.setLineWidth(10);
+                    canvas.setLineWidth(strokeSize);
                     canvas.setLineCap("round");
                     canvas.setMiterLimit(1);
-
+                    canvas.setStrokeStyle(strokeColor);
                     canvas.moveTo(prevX, prevY);
                     canvas.lineTo(x, y);
 
@@ -103,6 +106,8 @@ public class AppUI extends UI {
             }
         });
 
+
+
         bs.addComponent(new Button("Clear", new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -110,53 +115,10 @@ public class AppUI extends UI {
             }
         }));
 
+        bs.addComponent(this.getColorPicker());
 
-        bs.addComponent(new Button("Initial", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawInitialPattern();
-            }
-        }));
+        bs.addComponent(this.getSlider());
 
-        bs.addComponent(new Button("Rectangles", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawRects();
-            }
-        }));
-
-        bs.addComponent(new Button("Text", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawText();
-            }
-        }));
-
-        bs.addComponent(new Button("Lines", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawLines();
-            }
-        }));
-
-        bs.addComponent(new Button("Gradients", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawGradients();
-            }
-        }));
-        bs.addComponent(new Button("Composition", new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                drawCompositions();
-            }
-        }));
-        bs.addComponent(new Button("Images", new Button.ClickListener() {
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    drawImages();
-                }
-        }));
 
         canvas.loadImages(new String[] {
                 "http://webapp.org.ua/wp-content/uploads/2011/10/gwtlogo.jpg",
@@ -165,194 +127,40 @@ public class AppUI extends UI {
 
     }
 
-    private void drawInitialPattern() {
-        canvas.clear();
-        canvas.saveContext();
-        canvas.translate(175d, 175d);
-        canvas.scale(1.6d, 1.6d);
+    private Slider getSlider(){
+        Slider slider = new Slider();
+        slider.setImmediate(true);
+        slider.setMin(0);
+        slider.setMax(100.0);
+        slider.setValue(strokeSize);
+        slider.addValueChangeListener(e -> {
+            strokeSize = (Double) e.getProperty().getValue();
 
-        for (int i = 1; i < 6; ++i) {
-            canvas.saveContext();
-            canvas.setFillStyle("rgb(" + (51 * i) + "," + (255 - 51 * i)
-                    + ",255)");
+            Notification.show("Value changed:",
+                    String.valueOf(strokeSize),
+                    Notification.Type.TRAY_NOTIFICATION);
+        });
 
-            for (int j = 0; j < i * 6; ++j) {
-                canvas.rotate((Math.PI * 2d / (i * 6)));
-                canvas.beginPath();
-                canvas.arc(0d, i * 12.5d, 5d, 0d, Math.PI * 2d, true);
-                canvas.closePath();
-                canvas.fill();
+        return slider;
+    }
+
+    private ColorPicker getColorPicker(){
+        ColorPicker picker = new ColorPicker();
+        picker.addColorChangeListener(new ColorChangeListener() {
+            @Override
+            public void colorChanged(ColorChangeEvent colorChangeEvent) {
+                strokeColor = colorChangeEvent.getColor().getCSS();
+
+                Notification.show("Color changed: " + strokeColor,
+                        Notification.Type.TRAY_NOTIFICATION);
+
             }
-
-            canvas.restoreContext();
-        }
-
-        canvas.closePath();
-
-        canvas.restoreContext();
+        });
+        picker.setSwatchesVisibility(false);
+        picker.setHistoryVisibility(false);
+        picker.setTextfieldVisibility(false);
+        picker.setHSVVisibility(false);
+        return picker;
     }
 
-    private void drawRects() {
-        canvas.saveContext();
-        canvas.clear();
-
-        canvas.moveTo(0, 0);
-        canvas.fillRect(10, 20, 50, 70);
-
-        canvas.setStrokeStyle("rgb(25, 250, 150)");
-        canvas.strokeRect(100, 10, 50, 50);
-
-        canvas.beginPath();
-        canvas.setStrokeStyle("rgb(255, 50, 150)");
-        canvas.rect(100, 150, 50, 50);
-        canvas.stroke();
-
-        canvas.setStrokeStyle("rgb(125, 150, 255)");
-        canvas.setGlobalAlpha(0.5);
-        canvas.fillRect(30, 30, 100, 150);
-
-        canvas.setGlobalAlpha(0.9);
-
-        canvas.setFillStyle("blue");
-        canvas.fillRect(280, 50, 75, 50);
-
-        canvas.setFillStyle("yellow");
-        canvas.fillRect(200, 200, 50, 50);
-
-        canvas.transform(1, 0.5, -0.5, 1, 10, 10);
-        canvas.setFillStyle("red");
-        canvas.fillRect(200, 200, 50, 50);
-
-        canvas.transform(1, 0.5, -0.5, 1, 10, 10);
-        canvas.setFillStyle("blue");
-        canvas.fillRect(200, 200, 50, 50);
-
-        canvas.restoreContext();
-    }
-
-    private void drawText() {
-        canvas.saveContext();
-        canvas.clear();
-        canvas.moveTo(0, 0);
-
-        canvas.setFont("italic bold 25px sans-serif");
-        canvas.setTextBaseline("top");
-        canvas.fillText("Text with TOP baseline", 10d, 200d, 0d);
-
-        canvas.setTextBaseline("bottom");
-        canvas.setFillStyle("rgb(0, 200, 0)");
-        canvas.fillText("Text with BOTTOM baseline", 10d, 200d, 0d);
-
-        canvas.restoreContext();
-    }
-
-    private void drawImages() {
-        canvas.saveContext();
-        canvas.clear();
-        canvas.moveTo(0, 0);
-
-        canvas.drawImage1(
-                "http://webapp.org.ua/wp-content/uploads/2011/10/gwtlogo.jpg",
-                0, 0);
-
-        canvas.drawImage2(
-                "http://upload.wikimedia.org/wikipedia/commons/3/38/HTML5_Logo.svg",
-                50, 50, 200, 200);
-
-        canvas.drawImage3(
-                "http://jole.virtuallypreinstalled.com/paymate/img/vaadin-logo.png",
-                20, 20, 100, 100, 100, 100, 50, 100);
-
-        canvas.restoreContext();
-    }
-
-    private void drawLines() {
-        canvas.saveContext();
-        canvas.clear();
-
-        canvas.beginPath();
-        canvas.setLineWidth(10);
-        canvas.setLineCap("round");
-        canvas.setMiterLimit(1);
-        canvas.moveTo(10, 50);
-        canvas.lineTo(30, 150);
-        canvas.lineTo(50, 50);
-        canvas.stroke();
-        canvas.closePath();
-
-        canvas.beginPath();
-        canvas.setLineWidth(5);
-        canvas.setLineCap("butt");
-        canvas.setLineJoin("round");
-        canvas.setMiterLimit(1);
-        canvas.moveTo(70, 50);
-        canvas.lineTo(90, 150);
-        canvas.lineTo(110, 50);
-        canvas.stroke();
-        canvas.closePath();
-
-        canvas.beginPath();
-        canvas.moveTo(20, 200);
-        canvas.quadraticCurveTo(20, 275, 200, 200);
-        canvas.stroke();
-
-        canvas.restoreContext();
-    }
-
-    private void drawGradients() {
-        canvas.saveContext();
-        canvas.clear();
-
-        canvas.createLinearGradient("g1", 0, 0, 170, 0);
-        canvas.addColorStop("g1", 0, "black");
-        canvas.addColorStop("g1", 1, "white");
-
-        canvas.setGradientFillStyle("g1");
-        canvas.fillRect(10, 10, 100, 50);
-
-        canvas.createRadialGradient("g2", 75, 50, 5, 90, 60, 100);
-        canvas.addColorStop("g2", 0, "red");
-        canvas.addColorStop("g2", 1, "white");
-
-        // Fill with gradient
-        canvas.setGradientFillStyle("g2");
-        canvas.fillRect(10, 100, 100, 50);
-
-        canvas.createRadialGradient("g3", 115, 50, 5, 190, 60, 100);
-        canvas.addColorStop("g3", 0, "green");
-        canvas.addColorStop("g3", 1, "blue");
-
-        canvas.beginPath();
-        canvas.setGradientStrokeStyle("g3");
-        canvas.setLineWidth(20);
-        canvas.moveTo(170, 50);
-        canvas.lineTo(190, 150);
-        canvas.lineTo(210, 50);
-        canvas.stroke();
-        canvas.closePath();
-
-        canvas.restoreContext();
-    }
-
-    private void drawCompositions() {
-        if (++currentOpId == compositeOps.length)
-            currentOpId = 0;
-
-        canvas.saveContext();
-        canvas.clear();
-
-        compositionName.setValue(compositeOps[currentOpId]);
-
-        // Draw destination shape
-        canvas.setFillStyle("red");
-        canvas.fillRect(10, 10, 100, 100);
-
-        canvas.setGlobalCompositeOperation(compositeOps[currentOpId]);
-
-        // Draw source shape
-        canvas.setFillStyle("blue");
-        canvas.fillRect(60, 60, 100, 100);
-
-        canvas.restoreContext();
-    }
 }
