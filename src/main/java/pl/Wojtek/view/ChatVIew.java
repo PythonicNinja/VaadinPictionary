@@ -1,6 +1,7 @@
 package pl.Wojtek.view;
 
 import com.vaadin.ui.*;
+import pl.Wojtek.model.Message;
 import pl.Wojtek.model.User;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -9,6 +10,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Button.ClickEvent;
+import pl.Wojtek.util.Broadcaster;
 
 import java.util.Objects;
 
@@ -54,9 +56,14 @@ public class ChatView extends VerticalLayout implements View {
             sendMessage(message);
         }
     }
-    private void sendMessage(String message){
-        if(!Objects.equals(message, "")) {
+    private void sendMessage(String content){
+        if(!Objects.equals(content, "")) {
+            Message message = new Message();
+            message.setUser(user);
+            message.setContent(content);
 
+            Broadcaster.broadcastMessage(message);
+            input.setValue("");
         } else {
             new Notification("Message cannot be empty!").show(Page
                     .getCurrent());

@@ -1,17 +1,25 @@
 package pl.Wojtek.model;
 
+import com.vaadin.server.VaadinSession;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Objects;
+import java.util.UUID;
 
 public class User {
+
+    private UUID id;
 
     @NotNull
     @Size(min=1, max=20, message="Login length must be 1-15 characters")
     private String username;
 
     @NotNull
-    @Size(min=5, max=20, message="Password length must be 5-20 characters")
+    @Size(min=1, max=20, message="Password length must be 1-20 characters")
     private String password;
+
+    private Room room;
 
     public User(){}
 
@@ -21,7 +29,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User(" + username + "/" + password + ")";
+        return "User(" + username + "/" + password + '@' + room.toString() + ")";
     }
 
     public String getUsername() {
@@ -40,4 +48,27 @@ public class User {
         this.password = password;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public Boolean hasRoom(){
+        return !Objects.equals(this.room.toString(), "");
+    }
+
+    public void logout(){
+        VaadinSession.getCurrent().getSession().setAttribute("user", null);
+    }
 }

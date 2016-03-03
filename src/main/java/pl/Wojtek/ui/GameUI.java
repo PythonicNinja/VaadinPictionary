@@ -7,12 +7,16 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import org.vaadin.hezamu.canvas.Canvas;
+import pl.Wojtek.model.Message;
+import pl.Wojtek.model.User;
+import pl.Wojtek.util.Broadcaster;
 import pl.Wojtek.view.ChatView;
 
 
@@ -20,9 +24,9 @@ import pl.Wojtek.view.ChatView;
 @SuppressWarnings("serial")
 @Theme("valo")
 @Widgetset("pl.Wojtek.MyAppWidgetset")
-public class AppUI extends UI {
+public class GameUI extends UI implements Broadcaster.BroadcastListener {
 
-
+    private User user;
     private Canvas canvas;
     private ChatView chatView;
     private Boolean isClicked = false;
@@ -31,14 +35,21 @@ public class AppUI extends UI {
     private String strokeColor = "black";
     private double strokeSize = 5.0;
 
-    @WebServlet(value = { "/*", "/VAADIN/*" }, asyncSupported = true)
-    @VaadinServletConfiguration(widgetset="pl.Wojtek.MyAppWidgetset", productionMode = false, ui = AppUI.class)
+    @Override
+    public void receiveBroadcast(Message message) {
+
+    }
+
+    @WebServlet(value = { "/VAADIN/*", "/game/*" }, asyncSupported = true)
+    @VaadinServletConfiguration(widgetset="pl.Wojtek.MyAppWidgetset", productionMode = false, ui = GameUI.class)
     public static class Servlet extends VaadinServlet {
     }
 
 
     @Override
     protected void init(VaadinRequest request) {
+        user = ((User) VaadinSession.getCurrent().getSession().getAttribute("user"));
+
         VerticalLayout content = new VerticalLayout();
         setContent(content);
 
@@ -53,7 +64,9 @@ public class AppUI extends UI {
         canvas.setHeight("500px");
         canvasWrapper.addComponent(canvas);
         final HorizontalLayout bs = new HorizontalLayout();
+        final HorizontalLayout bs2 = new HorizontalLayout();
         canvasWrapper.addComponent(bs);
+        canvasWrapper.addComponent(bs2);
 
         firstRow.addComponent(canvasWrapper);
 
@@ -119,6 +132,14 @@ public class AppUI extends UI {
 
         bs.addComponent(this.getSlider());
 
+        bs2.addComponent(new Button("Logout", new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                user.logout();
+                getUI().getPage().reload();
+            }
+        }));
+
 
         canvas.loadImages(new String[] {
                 "http://webapp.org.ua/wp-content/uploads/2011/10/gwtlogo.jpg",
@@ -161,6 +182,10 @@ public class AppUI extends UI {
         picker.setTextfieldVisibility(false);
         picker.setHSVVisibility(false);
         return picker;
+    }
+
+    private void updateChat(Message message){
+
     }
 
 }
