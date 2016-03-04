@@ -10,15 +10,18 @@ import com.vaadin.server.SystemError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import org.vaadin.hezamu.canvas.Canvas;
+import pl.Wojtek.model.Draw;
 import pl.Wojtek.model.Message;
 import pl.Wojtek.model.User;
 import pl.Wojtek.util.Broadcaster;
+import pl.Wojtek.util.Point;
 import pl.Wojtek.view.ChatView;
 
 
@@ -32,8 +35,8 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
     private Canvas canvas;
     private ChatView chatView;
     private Boolean isClicked = false;
-    private int prevX = -1;
-    private int prevY = -1;
+    private double prevX = -1;
+    private double prevY = -1;
     private String strokeColor = "black";
     private double strokeSize = 5.0;
 
@@ -43,6 +46,17 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
             @Override
             public void run() {
                 chatView.recievedMessage(message);
+            }
+        });
+    }
+
+    @Override
+    public void receiveBroadcast(Draw draw) {
+        System.out.println(draw);
+        access(new Runnable() {
+            @Override
+            public void run() {
+                GameUI.drawDrawing(canvas, draw);
             }
         });
     }
@@ -85,28 +99,20 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
         canvas.addMouseMoveListener(new Canvas.CanvasMouseMoveListener() {
             @Override
             public void onMove(MouseEventDetails mouseDetails) {
-                int x = mouseDetails.getClientX();
-                int y = mouseDetails.getClientY();
+                double x = mouseDetails.getClientX();
+                double y = mouseDetails.getClientY();
 
-//                System.out.println("Mouse moved at "
-//                        + x + ","
-//                        + y + " - " + strokeColor);
 
                 if(isClicked && prevX != -1 && prevY != -1) {
-                    canvas.saveContext();
-                    canvas.beginPath();
 
-                    canvas.setLineWidth(strokeSize);
-                    canvas.setLineCap("round");
-                    canvas.setMiterLimit(1);
-                    canvas.setStrokeStyle(strokeColor);
-                    canvas.moveTo(prevX, prevY);
-                    canvas.lineTo(x, y);
+                    Draw draw = new Draw();
+                    draw.setUser(user);
+                    draw.setColor(strokeColor);
+                    draw.setNewPoint(new Point(x, y));
+                    draw.setPrevPoint(new Point(prevX, prevY));
+                    draw.setStrokeSize(strokeSize);
 
-                    canvas.stroke();
-                    canvas.closePath();
-
-                    canvas.restoreContext();
+                    Broadcaster.broadcastMessage(draw);
                 }
                 prevX = x;
                 prevY = y;
@@ -189,6 +195,24 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
         picker.setTextfieldVisibility(false);
         picker.setHSVVisibility(false);
         return picker;
+    }
+
+    private static void drawDrawing(Canvas canvas, Draw draw){
+
+        canvas.saveContext();
+        canvas.beginPath();
+
+        canvas.setLineWidth(draw.getStrokeSize());
+        canvas.setLineCap("round");
+        canvas.setMiterLimit(1);
+        canvas.setStrokeStyle(draw.getColor());
+        canvas.moveTo(draw.getPrevPoint().getX(), draw.getPrevPoint().getY());
+        canvas.lineTo(draw.getNewPoint().getX(), draw.getNewPoint().getY());
+
+        canvas.stroke();
+        canvas.closePath();
+
+        canvas.restoreContext();
     }
 
     @Override
