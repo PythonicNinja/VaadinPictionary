@@ -41,7 +41,6 @@ public class RoomView extends VerticalLayout {
             register = new Button("Create");
 
             name = new TextField("Room name: ");
-            name.addValidator(new RoomValidator());
             name.addValidator(new BeanValidator(Room.class, "name"));
             name.setImmediate(true);
 
@@ -62,23 +61,7 @@ public class RoomView extends VerticalLayout {
                     }
                 }
             });
-
         }
-
-        private class RoomValidator implements Validator {
-
-            @Override
-            public void validate(Object value) throws InvalidValueException {
-                String object = (String) value;
-                if (new RoomDao().getRoom((String) object) != null) {
-                    throw new InvalidValueException("Room already exists");
-                }
-            }
-
-        }
-
-
-
     }
 
 }

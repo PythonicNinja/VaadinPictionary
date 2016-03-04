@@ -5,6 +5,8 @@ import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
+import com.vaadin.event.LayoutEvents;
+import com.vaadin.server.SystemError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
@@ -37,7 +39,12 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
 
     @Override
     public void receiveBroadcast(Message message) {
-
+        access(new Runnable() {
+            @Override
+            public void run() {
+                chatView.recievedMessage(message);
+            }
+        });
     }
 
     @WebServlet(value = { "/VAADIN/*", "/game/*" }, asyncSupported = true)
@@ -72,6 +79,8 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
 
         chatView = new ChatView();
         firstRow.addComponent(chatView);
+
+        Broadcaster.register(user.getRoom(), this);
 
         canvas.addMouseMoveListener(new Canvas.CanvasMouseMoveListener() {
             @Override
@@ -118,8 +127,6 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
                 isClicked = false;
             }
         });
-
-
 
         bs.addComponent(new Button("Clear", new Button.ClickListener() {
             @Override
@@ -184,8 +191,10 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
         return picker;
     }
 
-    private void updateChat(Message message){
-
+    @Override
+    public void detach() {
+        Broadcaster.unregister(user.getRoom(), this);
+        super.detach();
     }
 
 }

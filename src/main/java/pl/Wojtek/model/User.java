@@ -65,7 +65,7 @@ public class User {
     }
 
     public Boolean hasRoom(){
-        return !Objects.equals(this.room.toString(), "");
+        return this.room != null;
     }
 
     public void logout(){

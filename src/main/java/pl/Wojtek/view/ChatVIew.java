@@ -17,7 +17,7 @@ import java.util.Objects;
 public class ChatView extends VerticalLayout implements View {
     private TextField input;
     public Panel chatContentPanel;
-    private VerticalLayout chatContent;
+    public VerticalLayout chatContent;
     private HorizontalLayout chatControl;
     private User user;
 
@@ -69,5 +69,13 @@ public class ChatView extends VerticalLayout implements View {
                     .getCurrent());
 
         }
+    }
+
+    public void recievedMessage(Message message){
+
+        chatContent.addComponent(
+            new Label("-" + message.getUser().getUsername() + ": " + message.getContent())
+        );
+
     }
 }
