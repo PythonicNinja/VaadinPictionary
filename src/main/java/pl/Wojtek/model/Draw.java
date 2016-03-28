@@ -1,26 +1,15 @@
 package pl.Wojtek.model;
 
-import com.vaadin.shared.ui.colorpicker.Color;
 import pl.Wojtek.util.Point;
 
 /**
  *
  */
-public class Draw {
-
-    private User user;
+public class Draw extends Action {
     private Point prevPoint;
     private Point newPoint;
     private String color;
     private double strokeSize;
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
 
     public Point getPrevPoint() {

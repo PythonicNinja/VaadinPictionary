@@ -4,7 +4,6 @@ import com.vaadin.server.VaadinSession;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -26,6 +25,7 @@ public class User {
     public User(String username) {
         this.username = username;
     }
+
 
     @Override
     public String toString() {
@@ -61,6 +61,16 @@ public class User {
     }
 
     public void setRoom(Room room) {
+        Boolean insert = (this.room == null);
+        Boolean update = (this.room != null);
+        if(insert) {
+            room.addUser(this);
+        }else{
+            this.room.removeUser(this); // delete
+            if(room != null){ // update
+                room.addUser(this);
+            }
+        }
         this.room = room;
     }
 

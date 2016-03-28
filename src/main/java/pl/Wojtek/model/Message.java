@@ -1,18 +1,14 @@
 package pl.Wojtek.model;
 
 
-public class Message {
+public class Message extends Action {
     private String content;
-    private User user;
 
-    public User getUser() {
-        return user;
+    public Message() {}
+
+    public Message(String s) {
+        this.content = s;
     }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
 
     public String getContent() {
         return content;

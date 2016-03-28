@@ -1,10 +1,7 @@
 package pl.Wojtek.util;
 
 
-import pl.Wojtek.model.Draw;
-import pl.Wojtek.model.Message;
-import pl.Wojtek.model.Room;
-import pl.Wojtek.model.User;
+import pl.Wojtek.model.*;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,6 +21,8 @@ public class Broadcaster implements Serializable {
     public interface BroadcastListener {
         void receiveBroadcast(Message message);
         void receiveBroadcast(Draw draw);
+        void receiveBroadcast(Clear clear);
+        void receiveBroadcast(Game game);
     }
 
     private static LinkedList<BroadcastListener> listeners = new LinkedList<BroadcastListener>();
@@ -83,6 +82,36 @@ public class Broadcaster implements Serializable {
                 @Override
                 public void run() {
                     listener.receiveBroadcast(draw);
+                }
+            });
+    }
+
+    public static synchronized void broadcastMessage(final Clear clear) {
+        User user = clear.getUser();
+        Room room = user.getRoom();
+        System.out.println(
+                room + " - " + rooms.get(room.getName())
+        );
+        for (final BroadcastListener listener : rooms.get(room.getName()))
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.receiveBroadcast(clear);
+                }
+            });
+    }
+
+    public static synchronized void broadcastMessage(final Game game) {
+
+        Room room = game.getRoom();
+        System.out.println(
+                room + " - " + rooms.get(room.getName())
+        );
+        for (final BroadcastListener listener : rooms.get(room.getName()))
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.receiveBroadcast(game);
                 }
             });
     }

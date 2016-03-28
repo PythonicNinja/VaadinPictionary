@@ -53,8 +53,12 @@ public class RoomView extends VerticalLayout {
                 public void buttonClick(Button.ClickEvent event) {
                     if (name.isValid()) {
                         room.setName(name.getValue());
-                        new RoomDao().addRoom(room);
-
+                        RoomDao roomDao = new RoomDao();
+                        if(roomDao.getRoom(room.getName()) == null){
+                            new RoomDao().addRoom(room);
+                        }else{
+                            room = roomDao.getRoom(room.getName());
+                        }
                         User user = (User) ((HttpServletRequest) request).getSession().getAttribute("user");
                         user.setRoom(room);
                         UI.getCurrent().getPage().setLocation("/game");

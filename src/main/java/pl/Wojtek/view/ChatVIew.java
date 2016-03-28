@@ -1,6 +1,8 @@
 package pl.Wojtek.view;
 
+import com.vaadin.event.LayoutEvents;
 import com.vaadin.ui.*;
+import pl.Wojtek.model.Game;
 import pl.Wojtek.model.Message;
 import pl.Wojtek.model.User;
 
@@ -23,24 +25,28 @@ public class ChatView extends VerticalLayout implements View {
 
     public ChatView() {
         user = (User) VaadinSession.getCurrent().getSession().getAttribute("user");
-        chatContentPanel = new Panel();
+
         chatContent = new VerticalLayout();
         chatControl = new HorizontalLayout();
-        chatContentPanel.setHeight("500px");
+
+        chatContentPanel = new Panel("Chat");
+        chatContentPanel.setHeight("600px");
         chatContentPanel.setContent(chatContent);
-        input = new TextField();
-        input.setWidth("100%");
-        chatControl.addComponent(input);
+
+
         chatControl.setSizeFull();
+
         Button sendButton = new Button("Send");
         sendButton.setClickShortcut(KeyCode.ENTER);
         sendButton.addClickListener(new SendMessageButton());
         chatControl.addComponent(sendButton);
 
-        addComponent(chatContentPanel);
-        addComponent(chatContent);
-        addComponent(chatControl);
+        input = new TextField();
+        input.setWidth("100%");
+        chatControl.addComponent(input);
 
+        addComponent(chatContentPanel);
+        addComponent(chatControl);
     }
 
     @Override
@@ -72,10 +78,15 @@ public class ChatView extends VerticalLayout implements View {
     }
 
     public void recievedMessage(Message message){
+        final Label messageLabel = new Label(message.getUser().getUsername() + ": " + message.getContent());
+        chatContent.addComponent(messageLabel);
+        chatContentPanel.setContent(chatContent);
+    }
 
-        chatContent.addComponent(
-            new Label("-" + message.getUser().getUsername() + ": " + message.getContent())
-        );
-
+    public void gameChanged(Game game){
+        final Label messageLabel = new Label("//" + game.toString());
+        chatContent.addComponent(messageLabel);
+        chatContentPanel.setContent(chatContent);
+        chatContentPanel.setScrollTop(10000);
     }
 }
