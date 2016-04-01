@@ -1,20 +1,13 @@
 package pl.Wojtek.view;
 
-import com.vaadin.data.Validator;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.validator.BeanValidator;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
 import pl.Wojtek.dao.RoomDao;
-import pl.Wojtek.dao.UserDao;
 import pl.Wojtek.model.Room;
 import pl.Wojtek.model.User;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 public class RoomView extends VerticalLayout {

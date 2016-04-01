@@ -1,13 +1,10 @@
 package pl.Wojtek.dao;
 
 import pl.Wojtek.data.GameContainer;
-import pl.Wojtek.data.RoomContainer;
 import pl.Wojtek.model.Game;
 import pl.Wojtek.model.Player;
 import pl.Wojtek.model.Room;
-import pl.Wojtek.model.User;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 

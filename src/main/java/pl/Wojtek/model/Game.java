@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  *
@@ -29,7 +30,7 @@ public class Game {
 
     @Min(value = 10)   // 10 seconds
     @Max(value = 3*60) // 3 minutes
-    private int turnTime = 10;
+    private int turnTime = 60;
 
     public Room getRoom() {
         return room;
@@ -165,11 +166,12 @@ public class Game {
 
     public void guessed(User user, Long timeLeft) {
         for (Player player: players) {
+            System.out.print("tileLeft" + timeLeft);
             if(player.getUsername().equals(user.getUsername())){
-                player.addPoints(timeLeft*100.0+100.0);
+                player.addPoints(timeLeft/100.0+100.0);
             }
             if(player.getUsername().equals(this.currentPlayer.getUsername())){
-                player.addPoints(timeLeft*100.0);
+                player.addPoints(timeLeft/100.0);
             }
         }
         this.timeLeft = 0;

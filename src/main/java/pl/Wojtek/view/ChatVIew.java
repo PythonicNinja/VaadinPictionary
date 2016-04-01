@@ -1,17 +1,15 @@
 package pl.Wojtek.view;
 
-import com.vaadin.event.LayoutEvents;
-import com.vaadin.ui.*;
-import pl.Wojtek.model.Game;
-import pl.Wojtek.model.Message;
-import pl.Wojtek.model.User;
-
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
+import pl.Wojtek.model.Game;
+import pl.Wojtek.model.Message;
+import pl.Wojtek.model.User;
 import pl.Wojtek.util.Broadcaster;
 
 import java.util.Objects;
@@ -81,12 +79,13 @@ public class ChatView extends VerticalLayout implements View {
         final Label messageLabel = new Label(message.getUser().getUsername() + ": " + message.getContent());
         chatContent.addComponent(messageLabel);
         chatContentPanel.setContent(chatContent);
+        chatContentPanel.setScrollTop(10000);
     }
 
     public void gameChanged(Game game){
-        final Label messageLabel = new Label("//" + game.toString());
-        chatContent.addComponent(messageLabel);
-        chatContentPanel.setContent(chatContent);
-        chatContentPanel.setScrollTop(10000);
+//        final Label messageLabel = new Label("//" + game.toString());
+//        chatContent.addComponent(messageLabel);
+//        chatContentPanel.setContent(chatContent);
+//        chatContentPanel.setScrollTop(10000);
     }
 }

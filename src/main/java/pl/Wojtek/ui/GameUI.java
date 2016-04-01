@@ -1,26 +1,15 @@
 package pl.Wojtek.ui;
 
-import javax.servlet.annotation.WebServlet;
-
-
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.core.java.lang.Boolean_CustomFieldSerializer;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
-import com.vaadin.event.LayoutEvents;
-import com.vaadin.event.UIEvents;
-import com.vaadin.server.SystemError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.ui.MediaControl;
-import com.vaadin.shared.ui.colorpicker.Color;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import org.vaadin.hezamu.canvas.Canvas;
@@ -32,9 +21,9 @@ import pl.Wojtek.util.Point;
 import pl.Wojtek.util.State;
 import pl.Wojtek.view.ChatView;
 
-import java.util.Iterator;
-import java.util.Objects;
+import javax.servlet.annotation.WebServlet;
 import java.util.Calendar;
+import java.util.Iterator;
 
 
 @Push
@@ -327,9 +316,11 @@ public class GameUI extends UI implements Broadcaster.BroadcastListener {
             canvasControl.removeComponent(countdownClock);
 
             if (game.getTurnTime() == game.getTimeLeft()) {
+
                 if (user.getUsername().equals(game.getCurrentPlayer().getUsername()) && game.getCurrentWord() != null) {
                     Notification.show("Current word: " + game.getCurrentWord().getWord(),
                             Notification.Type.WARNING_MESSAGE);
+                    Broadcaster.broadcastMessage(new Clear(user));
                 }
 
                 Calendar c = Calendar.getInstance();

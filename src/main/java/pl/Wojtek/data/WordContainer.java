@@ -1,9 +1,11 @@
 package pl.Wojtek.data;
 
-import pl.Wojtek.model.Room;
 import pl.Wojtek.model.Word;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class WordContainer {
 
